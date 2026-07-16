@@ -4313,11 +4313,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Download\\MaxVerse\\MaxVerse\\backend\\MaxVerse.API\\MaxVerse.API.csproj",
+      "projectUniqueName": "C:\\Users\\PC\\source\\repos\\BackendMaxVerse\\MaxVerse.API.csproj",
       "projectName": "MaxVerse.API",
-      "projectPath": "D:\\Download\\MaxVerse\\MaxVerse\\backend\\MaxVerse.API\\MaxVerse.API.csproj",
+      "projectPath": "C:\\Users\\PC\\source\\repos\\BackendMaxVerse\\MaxVerse.API.csproj",
       "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-      "outputPath": "D:\\Download\\MaxVerse\\MaxVerse\\backend\\MaxVerse.API\\obj\\",
+      "outputPath": "C:\\Users\\PC\\source\\repos\\BackendMaxVerse\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

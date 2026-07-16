@@ -349,6 +349,79 @@ public class OrdersController : ControllerBase
         });
     }
 
+    // POST /api/orders/pos
+    [HttpPost("pos")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreatePosOrder(CreatePosOrderDto dto)
+    {
+        if (dto.Items == null || !dto.Items.Any())
+            return BadRequest(new { message = "Cần chọn ít nhất 1 sản phẩm." });
+
+        var variantIds = dto.Items.Select(i => i.VariantId).ToList();
+        var variants = await _context.ProductVariants
+            .Include(v => v.Product)
+            .Where(v => variantIds.Contains(v.VariantId))
+            .ToListAsync();
+
+        foreach (var item in dto.Items)
+        {
+            var variant = variants.FirstOrDefault(v => v.VariantId == item.VariantId);
+            if (variant == null)
+                return BadRequest(new { message = $"Không tìm thấy sản phẩm (VariantId: {item.VariantId})." });
+            if (variant.Quantity < item.Quantity)
+                return BadRequest(new { message = $"'{variant.Product!.ProductName}' không đủ hàng (còn {variant.Quantity})." });
+        }
+
+        var totalAmount = dto.Items.Sum(item =>
+        {
+            var variant = variants.First(v => v.VariantId == item.VariantId);
+            return (variant.Product!.DiscountPrice ?? variant.Product.Price) * item.Quantity;
+        });
+
+        var orderCode = $"POS{DateTime.Now:yyyyMMddHHmmss}";
+        var adminId = CurrentUserId;
+
+        var order = new Order
+        {
+            UserId = adminId,
+            OrderCode = orderCode,
+            TotalAmount = totalAmount,
+            ShippingAddress = "Mua tại quầy",
+            ReceiverName = string.IsNullOrWhiteSpace(dto.ReceiverName) ? "Khách vãng lai" : dto.ReceiverName,
+            ReceiverPhone = string.IsNullOrWhiteSpace(dto.ReceiverPhone) ? "N/A" : dto.ReceiverPhone,
+            PaymentMethod = dto.PaymentMethod,
+            PaymentStatus = "Paid",
+            OrderStatus = "Completed",
+            OrderDetails = dto.Items.Select(item =>
+            {
+                var variant = variants.First(v => v.VariantId == item.VariantId);
+                return new OrderDetail
+                {
+                    VariantId = item.VariantId,
+                    ProductNameSnapshot = variant.Product!.ProductName,
+                    UnitPrice = variant.Product.DiscountPrice ?? variant.Product.Price,
+                    Quantity = item.Quantity
+                };
+            }).ToList()
+        };
+
+        foreach (var item in dto.Items)
+        {
+            var variant = variants.First(v => v.VariantId == item.VariantId);
+            variant.Quantity -= item.Quantity;
+        }
+
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            orderCode = order.OrderCode,
+            totalAmount = order.TotalAmount,
+            message = "Tạo đơn tại quầy thành công."
+        });
+    }
+
     private static OrderDto MapToDto(Order o) => new()
     {
         OrderId = o.OrderId,

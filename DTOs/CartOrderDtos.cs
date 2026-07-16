@@ -62,3 +62,17 @@ public class UpdateOrderStatusDto
 {
     public string OrderStatus { get; set; } = string.Empty;
 }
+
+public class CreatePosOrderDto
+{
+    public string? ReceiverName { get; set; }
+    public string? ReceiverPhone { get; set; }
+    public string PaymentMethod { get; set; } = "Cash";
+    public List<PosOrderItemDto> Items { get; set; } = new();
+}
+
+public class PosOrderItemDto
+{
+    public int VariantId { get; set; }
+    public int Quantity { get; set; }
+}
