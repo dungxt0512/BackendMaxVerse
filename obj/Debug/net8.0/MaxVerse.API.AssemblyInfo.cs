@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MaxVerse.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0ea0dec3a909d47b8f35e05eb5f8ee9fcfc81f69")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fb5b814199a462da7913ee02f24a3fba40e4d329")]
 [assembly: System.Reflection.AssemblyProductAttribute("MaxVerse.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MaxVerse.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
