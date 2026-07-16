@@ -15,11 +15,13 @@ public class OrdersController : ControllerBase
 {
     private readonly MaxVerseDbContext _context;
     private readonly VnPayHelper _vnPayHelper;
+    private readonly IConfiguration _configuration;
 
-    public OrdersController(MaxVerseDbContext context, VnPayHelper vnPayHelper)
+    public OrdersController(MaxVerseDbContext context, VnPayHelper vnPayHelper, IConfiguration configuration)
     {
         _context = context;
         _vnPayHelper = vnPayHelper;
+        _configuration = configuration;
     }
 
     private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -379,16 +381,18 @@ public class OrdersController : ControllerBase
         });
 
         var orderCode = $"POS{DateTime.Now:yyyyMMddHHmmss}";
-        var adminId = CurrentUserId;
+        var guestUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == "guest@maxverse.pos");
+        if (guestUser == null)
+            return BadRequest(new { message = "Chưa cấu hình tài khoản khách qua đường. Vui lòng liên hệ quản trị viên." });
 
         var order = new Order
         {
-            UserId = adminId,
+            UserId = guestUser.UserId,
             OrderCode = orderCode,
             TotalAmount = totalAmount,
             ShippingAddress = "Mua tại quầy",
-            ReceiverName = string.IsNullOrWhiteSpace(dto.ReceiverName) ? "Khách vãng lai" : dto.ReceiverName,
-            ReceiverPhone = string.IsNullOrWhiteSpace(dto.ReceiverPhone) ? "N/A" : dto.ReceiverPhone,
+            ReceiverName = "Khách qua đường",
+            ReceiverPhone = "N/A",
             PaymentMethod = dto.PaymentMethod,
             PaymentStatus = "Paid",
             OrderStatus = "Completed",
@@ -414,10 +418,22 @@ public class OrdersController : ControllerBase
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
 
+        string? qrUrl = null;
+        if (dto.PaymentMethod == "Transfer")
+        {
+            var bankId = _configuration["BankTransferSettings:BankId"];
+            var accountNo = _configuration["BankTransferSettings:AccountNo"];
+            var accountName = Uri.EscapeDataString(_configuration["BankTransferSettings:AccountName"] ?? "MAXVERSE");
+            var amount = (long)order.TotalAmount;
+            var info = Uri.EscapeDataString(order.OrderCode);
+            qrUrl = $"https://img.vietqr.io/image/{bankId}-{accountNo}-compact2.png?amount={amount}&addInfo={info}&accountName={accountName}";
+        }
+
         return Ok(new
         {
             orderCode = order.OrderCode,
             totalAmount = order.TotalAmount,
+            qrUrl,
             message = "Tạo đơn tại quầy thành công."
         });
     }

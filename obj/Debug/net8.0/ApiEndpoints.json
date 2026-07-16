@@ -233,6 +233,22 @@
   },
   {
     "ContainingType": "MaxVerse.API.Controllers.OrdersController",
+    "Method": "CreatePosOrder",
+    "RelativePath": "api/orders/pos",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "MaxVerse.API.DTOs.CreatePosOrderDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MaxVerse.API.Controllers.OrdersController",
     "Method": "VnPayReturn",
     "RelativePath": "api/orders/vnpay-return",
     "HttpMethod": "GET",
